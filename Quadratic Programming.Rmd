@@ -1,0 +1,103 @@
+---
+title: "Quadratic Programming"
+author: "Nischal Subedi"
+date: "4/22/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+In this module, I will use existing optimization packages to solve quadratic programming (QP) problems. Recall the classical form of QP:
+$$
+\min _{x} \frac{1}{2} x^{T} P x+q^{T} x
+$$
+subject to $\quad G x \preceq h$
+$$
+A x=b
+$$
+Consider the following example:
+$$
+\begin{array}{l}
+\min _{x, y \in \mathbb{R}} \frac{1}{2} x^{2}+3 x+4 y \\
+\text { subject to } \quad x+4 y \geq 18 \\
+2 x+5 y \leq 90 \\
+3 x+4 y \leq 80 \\
+x, y \geq 0
+\end{array}
+$$
+We can then write this example equivalently as the classical form using vectors/matrices:
+$$
+\min _{x, y \in \mathbb{R}} \frac{1}{2}\left(\begin{array}{l}
+x \\
+y
+\end{array}\right)^{T}\left(\begin{array}{ll}
+1 & 0 \\
+0 & 0
+\end{array}\right)\left(\begin{array}{l}
+x \\
+y
+\end{array}\right)+\left(\begin{array}{l}
+3 \\
+4
+\end{array}\right)^{T}\left(\begin{array}{l}
+x \\
+y
+\end{array}\right)
+$$
+$$
+\text { subject to }\left(\begin{array}{cc}
+-1 & -4 \\
+2 & 5 \\
+3 & 4 \\
+-1 & 0 \\
+0 & -1
+\end{array}\right)\left(\begin{array}{c}
+x \\
+y
+\end{array}\right) \leq\left(\begin{array}{c}
+-18 \\
+90 \\
+80 \\
+0 \\
+0
+\end{array}\right)
+$$
+We next use the R quadprog package  to solve the QP example above. Note that RMarkdown also allows you to run Python code by first installing **reticulate** package.
+
+
+
+
+```{r}
+library(quadprog)
+library(Matrix)
+
+
+# now we define the matrices/vectors based on the QP defined in the R documentation
+
+Dmat=matrix(c(1,0,0,0),nrow=2,ncol=2)
+
+Dvec=-c(3,4)
+b=c(18,-90,-80,0,0)
+Amat=t(matrix(c(1,-2,-3,1,0,4,-5,-4,0,1),nrow=5,ncol=2))
+
+Dpd=nearPD(Dmat)$mat#this ensures that the D needs to be positive definite, if D is not positive definite then solve.OP will give error.
+
+sol<-solve.QP(Dpd,Dvec,Amat,b,meq=0) # The first meq constraint are treated as equality constraint. Since, we do not have such constrant, we treat them as 0.
+
+# now lets print out the optimal solution
+
+sol$solution
+sol$value
+
+
+```
+
+
+
+
+
+
+
